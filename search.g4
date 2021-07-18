@@ -18,11 +18,11 @@ STRING :
     ;
 
 KEYS :
-    'name:'
-    | 'precondition:'
-    | 'purpose:'
-    | 'expect_result:'
-    | 'tags:'
+    'name:' | 'テストケース名:'
+    | 'precondition:' | '前提条件:'
+    | 'purpose:' | '目的:'
+    | 'expect_result:' | '期待結果:'
+    | 'tags:' | 'タグ:'
     ;
 
 WS : [ \t\r\n]+ -> skip ;

@@ -6,12 +6,16 @@ class CustomVisitor extends searchBaseVisitor {
     public $tags;
     public $model;
 
-    const KEY_TAG = 'tags:';
+    const KEY_NAME = ['name:', 'テストケース名:'];
+    const KEY_PRECONDITION = ['precondition:', '前提条件:'];
+    const KEY_PURPOSE = ['purpose:', '目的:'];
+    const KEY_EXPECT_RESULT = ['expect_result:', '期待結果:'];
+    const KEY_TAGS = ['tags:', 'タグ:'];
 
     function __construct($model) {
         $this->model = $model;
         $this->search = '';
-        $this->tags = '';
+        $this->tags = [];
         $this->exprs = [];
     }
 
@@ -29,7 +33,7 @@ class CustomVisitor extends searchBaseVisitor {
         return [
             'search' => $this->removeQuote($this->search),
             'query' => $this->exprs,
-            'tags' => $this->removeQuote($this->tags)
+            'tags' => $this->tags
         ];
     }
 
@@ -74,11 +78,14 @@ class CustomVisitor extends searchBaseVisitor {
         if (empty($key))
             return [];
 
-        if ($key == self::KEY_TAG) {
-            $this->tags = $val;
+        if (in_array($key,self::KEY_TAGS)) {
+            $this->tags[] = $this->removeQuote($val);
             return [];
         }
-        return [$this->getQuery($key, $val)];
+        $query = $this->getQuery($key, $val);
+        if (empty($query))
+            return [];
+        return [$query];
     }
 
     public function removeQuote($val) {
@@ -89,8 +96,27 @@ class CustomVisitor extends searchBaseVisitor {
     }
 
     public function getQuery($key, $val) {
-        $field = substr($key, 0, -1);
+        $mkey = $this->mapping($key);
+        if (empty($mkey))
+            return;
+        $field = substr($mkey, 0, -1);
         $val = $this->removeQuote($val);
         return $this->model . "." . $field . " LIKE '%{$val}%'";
+    }
+
+    public function mapping($key) {
+        if (in_array($key, self::KEY_NAME)) {
+            return self::KEY_NAME[0];
+        }
+        if (in_array($key, self::KEY_PRECONDITION)) {
+            return self::KEY_PRECONDITION[0];
+        }
+        if (in_array($key, self::KEY_PURPOSE)) {
+            return self::KEY_PURPOSE[0];
+        }
+        if (in_array($key, self::KEY_EXPECT_RESULT)) {
+            return self::KEY_EXPECT_RESULT[0];
+        }
+        return;
     }
 }
